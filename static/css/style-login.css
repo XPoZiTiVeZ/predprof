@@ -1,0 +1,39 @@
+@media screen and (min-width: 768px) {
+    .login {
+        background-color: lightgray;
+        width: 400px;
+        height: 400px;
+
+        padding: 10px;
+        margin: 80px auto 0;
+        
+        border-radius: 20px;
+        box-sizing: border-box;
+    }
+    .login h2 {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+    .login label {
+        display: block;
+        text-align: center;
+        font-size: large;
+    }
+    .login input {
+        display: block;
+        width: 300px;
+        height: 40px;
+        margin: 0 auto 40px;
+        box-sizing: border-box;
+        border-radius: 10px;
+        font-size: medium;
+        text-align: center;
+    }
+    .login button {
+        display: block;
+        width: 100px;
+        height: 40px;
+        margin: 80px auto 0;
+        border-radius: 10px;
+    }
+}

@@ -1,0 +1,15 @@
+@media screen and (min-width: 768px) {
+    .navbar {
+        display: flex;
+        width: 768px;
+        padding: 10px;
+    }
+    .nav-link {
+        display: block;
+        color: black;
+        font-size: 24px;
+        text-decoration: none;
+        margin: auto 0;
+        text-align: center;
+    }
+}

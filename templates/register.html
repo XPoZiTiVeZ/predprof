@@ -1,0 +1,48 @@
+{{ define "title" }}Регистрация аккаунта{{ end }}
+
+{{ define "main" }}
+<div class="register">
+    <form id="formRegister">
+        <h2>Регистрация</h2>
+        <label for="inputEmail">Почта</label>
+        <input id="inputEmail" type="email" name="email" required>
+        <label for="inputPassword">Пароль</label>
+        <input id="inputPassword" type="password" name="password" required>
+        <label for="inputRPassword">Повторите пароль</label>
+        <input id="inputRPassword" type="password" name="rpassword" required>
+        <button>Зарегистрироваться</button>
+    </form>
+</div>
+{{ end }}
+
+{{ define "script" }}
+<script>
+    const form = document.getElementById('formRegister');
+    form.addEventListener('submit', async(e) => {
+        e.preventDefault();
+
+        const email     = document.getElementById('inputEmail').value;
+        const password  = document.getElementById('inputPassword').value;
+        const rpassword = document.getElementById('inputRPassword').value;
+
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "email":     email,
+                "password":  password,
+                "rpassword": rpassword,
+            })
+        });
+
+        if (response.ok) {
+            alert('Успешная регистрация! Теперь вы можете войти в аккаунт.');
+            window.location.href = '/login';
+        } else {
+            alert('Неуспешная регистрация! Проверьте, что поля заполнены правильно.');
+        }
+    });
+</script>
+{{ end }}

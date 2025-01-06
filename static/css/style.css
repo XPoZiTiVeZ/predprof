@@ -1,0 +1,42 @@
+@import url("/static/css/style-navbar.css");
+@import url("/static/css/style-login.css");
+@import url("/static/css/style-register.css");
+@import url("/static/css/style-profile.css");
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 0px;
+    margin: 0px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.header {
+    display: flex;
+    background-color: lightgray;
+    width: 100%;
+    height: 80px;
+    justify-content: center;
+}
+
+.main {
+    position: relative;
+    flex-grow: 1;
+}
+
+.ms-auto {
+    margin-left: auto;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.me-20 {
+    margin-right: 20px;
+}
+
+.w1 {
+    width: 160px;
+}

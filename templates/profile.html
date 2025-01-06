@@ -1,0 +1,22 @@
+{{ define "title" }}Профиль {{ .User.Email }}{{end}}
+
+{{ define "main" }}
+<div class="profile">
+    <h1>Ваш профиль</h1>
+    <table>
+        <tr>
+            <th>Почта</th>
+            <td>{{ .User.Email }}</td>
+        </tr>
+        <tr>
+            <th>Пароль</th>
+            <td><a href="/profile/set_password">сменить пароль</a></td>
+        </tr>
+    </table>
+
+    <div class="navbar-down">
+        <a class="logout" href="/logout">Выход</a>
+        <a class="profile/delete" href="/logout">Выход</a>
+    </div>
+</div>
+{{end}}

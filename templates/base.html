@@ -1,11 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/static/css/style.css" />
+        <title>{{ block "title" $}}{{ end }}</title>
+    </head>
 <body>
-    
+    <div class="header">
+        <div class="navbar">
+        {{ if not .User.IsAuthenticated }}
+            <a class="nav-link mx-auto w1" href="/login">Вход</a>
+            <a class="nav-link mx-auto w1" href="/register">Регистрация</a>
+        {{ else if not .User.IsActive }}
+            <a class="nav-link mx-auto">Аккаунт не активирован</a>
+        {{ else if not .User.IsAdmin}}
+            <a class="nav-link" href="/inventory">Инвентарь</a>
+            <a class="nav-link ms-auto" href="/profile">Профиль</a>
+        {{ else }}
+            <a class="nav-link me-20" href="/inventory">Инвентарь</a>
+            <a class="nav-link" href="/manage">Управление</a>
+            <a class="nav-link ms-auto" href="/profile">Профиль</a>
+        {{ end }}
+        </div>
+    </div>
+    <div class="main">{{ block "main" $}} {{ end }}</div>
+    <div class="footer"></div>
+    {{ block "script" $}}{{ end }}
 </body>
 </html>

@@ -1,0 +1,8 @@
+#folders
+other
+
+#files
+breakpoints
+go.mod
+go.sum
+*.exe
