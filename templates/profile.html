@@ -2,21 +2,41 @@
 
 {{ define "main" }}
 <div class="profile">
-    <h1>Ваш профиль</h1>
-    <table>
-        <tr>
-            <th>Почта</th>
-            <td>{{ .User.Email }}</td>
-        </tr>
-        <tr>
-            <th>Пароль</th>
-            <td><a href="/profile/set_password">сменить пароль</a></td>
-        </tr>
-    </table>
+    {{ if .User.IsActive }}
+        <div class="profile-header">
+            <div class="navbar">
+                <h1>Ваш профиль</h1>
+                <a class="ms-auto" href="/logout">Выход</a>
+            </div>
+        </div>
+        <div class="profile-body">
+            <h2>Ваши данные</h2>
+            <table class="mb-50">
+                <tr>
+                    <th><a>Почта</a></th>
+                    <td><a>{{ .User.Email }}</a></td>
+                </tr>
+                <tr>
+                    <th><a>Пароль</a></th>
+                    <td><a href="/profile/set_password">сменить пароль</a></td>
+                </tr>
+            </table>
 
-    <div class="navbar-down">
-        <a class="logout" href="/logout">Выход</a>
-        <a class="profile/delete" href="/logout">Выход</a>
-    </div>
+            <h2>Взятые вещи</h2>
+            <p></p>
+        </div>
+        <div class="profile-footer">
+        </div>
+    {{ else }}
+        <div class="profile-header">
+            <h1>Ваш профиль</h1>
+        </div>
+        <div class="profile-body">
+            <h2>Ваш аккаунт не активирован!</h2>
+            <p>Подойдите к администрации, чтобы активировать аккаунт.</p>
+        </div>
+        <div class="profile-footer">
+        </div>
+    {{ end }}
 </div>
 {{end}}

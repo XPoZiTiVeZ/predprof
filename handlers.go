@@ -55,7 +55,7 @@ func Auth(w http.ResponseWriter, r *http.Request) User {
 	return user
 }
 
-func HomePage(w http.ResponseWriter, r *http.Request) {
+func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
 	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
 
@@ -78,7 +78,7 @@ func HomePage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func RegisterPage(w http.ResponseWriter, r *http.Request) {
+func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
 	if user.IsAuthenticated { http.Redirect(w, r, "/", http.StatusSeeOther) }
 
@@ -124,13 +124,13 @@ func RegisterPage(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(w, r, "/", http.StatusOK)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		http.Error(w, "Метод запрещён", http.StatusMethodNotAllowed)
 	}
 }
 
-func LoginPage(w http.ResponseWriter, r *http.Request) {
+func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
 	if user.IsAuthenticated { http.Redirect(w, r, "/", http.StatusSeeOther) }
 
@@ -194,13 +194,13 @@ func LoginPage(w http.ResponseWriter, r *http.Request) {
 			Expires: expirationTime,
 		})
 
-		http.Redirect(w, r, "/", http.StatusOK)
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	default:
 		http.Error(w, "Метод не разрешён", http.StatusMethodNotAllowed)
 	}
 }
 
-func ProfilePage(w http.ResponseWriter, r *http.Request) {
+func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
 	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
 
@@ -218,5 +218,21 @@ func ProfilePage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		tmp.Execute(w, ctx)
+	}
+}
+
+func LogoutPageHandler(w http.ResponseWriter, r *http.Request) {
+	user := Auth(w, r)
+	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
+
+	switch r.Method {
+	case "GET":
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Value:   "",
+			Expires: time.Unix(0, 0),
+		})
+
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
 	}
 }

@@ -5,10 +5,11 @@ import (
 )
 
 func registerRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("/",         HomePage)
-	mux.HandleFunc("/login",    LoginPage)
-	mux.HandleFunc("/register", RegisterPage)
-	mux.HandleFunc("/profile",  ProfilePage)
+	mux.HandleFunc("/",         HomePageHandler)
+	mux.HandleFunc("/login",    LoginPageHandler)
+	mux.HandleFunc("/register", RegisterPageHandler)
+	mux.HandleFunc("/profile",  ProfilePageHandler)
+	mux.HandleFunc("/logout",   LogoutPageHandler)
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 }

@@ -31,10 +31,55 @@ func openDB() (*sql.DB, error) {
 
     if err != nil {
         log.Printf("openDB: %s", err)
-    } else {
-        log.Print("DB opened successfully")
+        return db, err
     }
 
+    _, err = db.Exec(`
+    CREATE TABLE
+    IF NOT EXISTS
+    item_names (
+        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        name    TEXT UNIQUE
+    );`)
+
+    if err != nil {
+        log.Printf("openDB: %s", err)
+        return db, err
+    }
+
+    _, err = db.Exec(`
+    CREATE TABLE
+    IF NOT EXISTS
+    item_statuses (
+        id      INTEGER PRIMARY KEY AUTOINCREMENT,
+        name    TEXT UNIQUE
+    );`)
+
+    if err != nil {
+        log.Printf("openDB: %s", err)
+        return db, err
+    }
+
+    _, err = db.Exec(`
+    CREATE TABLE
+    IF NOT EXISTS
+    items (
+        id          INTEGER PRIMARY KEY AUTOINCREMENT,
+        name        TEXT
+        status      TEXT
+        quantity    INTEGER
+        user        INTEGER
+        FOREIGN KEY(item_names) REFERENCES item_names(name)
+        FOREIGN KEY(item_statuses) REFERENCES item_statuses(name)
+        FOREIGN KEY(users) REFERENCES users(id)
+    );`)
+
+    if err != nil {
+        log.Printf("openDB: %s", err)
+        return db, err
+    }
+
+    log.Print("DB opened successfully")
 	return db, nil
 }
 
