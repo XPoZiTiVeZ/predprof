@@ -1,6 +1,6 @@
 @media screen and (min-width: 768px) {
     .register {
-        background-color: lightgray;
+        background-color: var(--primary-color);
         width: 400px;
         height: 500px;
         

@@ -1,0 +1,133 @@
+{{ define "title" }}Прокат инвентаря{{ end }}
+
+{{ define "main"}}
+<div class="inventory">
+    <div class="modal" id="inventory-modal">
+        <div class="modal-body">
+            <div class="modal-header">
+                <h2>Взять вещь напрокат</h2>
+                <img src="/static/images/close.svg" alt="закрыть" onclick="HideModal()">
+            </div>
+            <div class="modal-main">
+                <table>
+                    <tr>
+                        <th>Название: </th>
+                        <td class="item-name"></td>
+                    </tr>
+                    <tr>
+                        <th>Статус: </th>
+                        <td class="item-status"></td>
+                    </tr>
+                    <tr>
+                        <th>Осталось: </th>
+                        <td class="item-quantity"></td>
+                    </tr>
+                </table>
+                <p>После нажатия кнопки заявка отправится к администрации.<br>Статус заявки можно посмотреть в профиле.<br>После одобрения заявки подойдите к администрации за вещью.</p>
+                <form action="/inventory" method="POST">
+                    <input class="d-none item-id" type="text" name="id">
+                    <div class="uq-wrapper">
+                        <input class="user-quantity" id="uq" type="number" name="quantity" value="1" min="1">
+                        <label for="uq">кол-во вещей</label>
+                    </div>
+                    <button>Подать заявку на прокат</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="top-side">
+        <div class="search-side">
+            <form action="/inventory" method="GET" id="inventory-search">
+                <input type="text" name="item">
+                <button>Искать</button>
+            </form>
+        </div>
+    </div>
+    <div class="bottom-side">
+        <h2>Доступный инвентарь</h2>
+        <div class="filter-side">
+            <form action="/inventory" method="GET" id="inventory-filter">
+                {{ range .Statuses }}
+                <div class="filter-form-line">
+                    <input type="checkbox" name="{{ .Id }}" id="input-status-{{ .Id }}" checked>
+                    <label for="input-status-{{ .Id }}">{{ .Name }}</label>
+                </div>
+                {{ end }}
+                <button>Выбрать</button>
+            </form>
+        </div>
+        <div class="inventory-side">
+            <table class="inventory-list">
+                <tr>
+                    <th><span>Наименование</span></th>
+                    <th><span>Статус</span></th>
+                    <th><span>Кол-во</span></th>
+                </tr>
+                {{ range .Inventory }}
+                <tr class="no-dec" onclick="ShowModal('{{ .Id }}', '{{ .Name }}', '{{ .Status }}', '{{ .Quantity }}')">
+                    <td>{{ .Name }}</td>
+                    <td>{{ .Status }}</td>
+                    <td>{{ .Quantity }}</td>
+                </tr>
+                {{ end }}
+            </table>
+        </div>
+    </div>
+</div>
+{{ end }}
+
+{{ define "script" }}
+<script>
+    const modal = document.getElementById("inventory-modal");
+    function ShowModal(id, name, status, quantity) {
+        const item_id       = modal.querySelector(".item-id");
+        const item_name     = modal.querySelector(".item-name");
+        const item_status   = modal.querySelector(".item-status");
+        const item_quantity = modal.querySelector(".item-quantity");
+        const user_quantity = modal.querySelector(".user-quantity");
+
+        item_id.value = id;
+        item_name.textContent = name;
+        item_status.textContent = status;
+        item_quantity.textContent = quantity;
+        user_quantity.value = "1";
+        user_quantity.setAttribute("max", quantity);
+        modal.classList.add("show");
+    }
+
+    function HideModal() {
+        modal.classList.remove("show");
+    }
+
+    const searchForm = document.getElementById("inventory-search");
+    const filterForm = document.getElementById("inventory-fitler");
+
+    searchForm.addEventListener("submit", getInventory);
+
+    async function getInventory() {
+        e.preventDefault();
+
+        const itemName = searchForm.querySelector("input").value;
+        const filters  = [filterForm.querySelectorAll("input")]
+
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "itemName":  name,
+                "filters": 
+            })
+        });
+
+        if (response.ok) {
+            alert('Успешная регистрация! Теперь вы можете войти в аккаунт.');
+            window.location.href = '/login';
+        } else {
+            alert('Неуспешная регистрация! Проверьте, что поля заполнены правильно.');
+        }
+
+    }
+</script>
+{{ end }}

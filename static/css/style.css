@@ -2,6 +2,13 @@
 @import url("/static/css/style-login.css");
 @import url("/static/css/style-register.css");
 @import url("/static/css/style-profile.css");
+@import url("/static/css/style-inventory.css");
+
+:root {
+    --primary-color: #cfcfcf;
+    --secondary-color: #bcbcbc;
+}
+
 body {
     display: flex;
     flex-direction: column;
@@ -13,15 +20,47 @@ body {
 
 .header {
     display: flex;
-    background-color: lightgray;
+    background-color: var(--primary-color);
     width: 100%;
     height: 80px;
     justify-content: center;
 }
 
 .main {
-    position: relative;
+    /* position: relative; */
     flex-grow: 1;
+}
+
+.inventory .modal {
+    position: absolute;
+    background: rgba(0, 0, 0, 70%);
+
+    width: 100vw;
+    height: 100vh;
+
+    top: 0;
+    left: 0;
+
+    z-index: -999;
+    opacity: 0;
+    transition: opacity 300ms ease-out, z-index 800ms ease-out;
+    transition-delay: 200ms;
+}
+
+.inventory .modal.show {
+    z-index: 999;
+    opacity: 1;
+    transition: opacity 300ms ease-in;
+}
+
+.inventory .modal.show > .modal-body {
+    z-index: 1000;
+    
+    top: 40%;
+    opacity: 1;
+    
+    transition: all 200ms ease-in;
+    transition-delay: 200ms;
 }
 
 .ms-auto {
@@ -43,4 +82,17 @@ body {
 
 .w1 {
     width: 160px !important;
+}
+
+.no-dec {
+    text-decoration: none;
+    list-style: none;
+}
+
+.d-none {
+    display: none !important;
+}
+
+.no-pad {
+    padding: 0;
 }

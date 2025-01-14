@@ -13,18 +13,6 @@ type PasswordsNotSame  struct { error }
 type NotAnEmail        struct { error }
 type UserExists        struct { error }
 
-type User struct {
-	Id				int
-	Email           string
-	Password        string
-	IsAuthenticated bool
-	IsActive        bool
-	IsAdmin         bool
-	IsSuperuser     bool
-	LastLogin		string
-	CreatedAt		string
-}
-
 func AuthenticateUser(formData LoginFormData) (User, error) {
 	user, err := GetUserByEmail(formData.Email)
 	if err != nil { return User{}, UserNotExists{} }

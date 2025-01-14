@@ -10,7 +10,6 @@ import (
 	_ "golang.org/x/crypto/bcrypt"
 )
 
-
 type LoginFormData struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -27,10 +26,15 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
+type ItemQueryFormData struct {
+	Id       int `json:"id"`
+	Quantity int `json:"quantity"`
+}
+
 func NewUser(Email, Password string, IsAuthenticated, IsActive, IsAdmin, IsSuperuser bool) User {
 	return User{
 		Email:           Email,
-		Password:		 Password,
+		Password:        Password,
 		IsAuthenticated: IsAuthenticated,
 		IsActive:        IsActive,
 		IsAdmin:         IsAdmin,
@@ -40,36 +44,44 @@ func NewUser(Email, Password string, IsAuthenticated, IsActive, IsAdmin, IsSuper
 
 func Auth(w http.ResponseWriter, r *http.Request) User {
 	c, err := r.Cookie("token")
-	if err != nil { return NewUser("Anonymous", "", false, false, false, false) }
+	if err != nil {
+		return NewUser("Anonymous", "", false, false, false, false)
+	}
 
 	tokenStr := c.Value
 	claims := &Claims{}
 
 	token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) { return jwtKey, nil })
 
-	if err != nil || !token.Valid { return NewUser("Anonymous", "", false, false, false, false) }
+	if err != nil || !token.Valid {
+		return NewUser("Anonymous", "", false, false, false, false)
+	}
 
 	user, err := GetUserByEmail(claims.Email)
-	if err != nil { return NewUser("Anonymous", "", false, false, false, false) }
+	if err != nil {
+		return NewUser("Anonymous", "", false, false, false, false)
+	}
 
 	return user
 }
 
 func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
-	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
+	if !user.IsAuthenticated {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
 
 	switch r.Method {
 	case "GET":
 		tmp := template.Must(template.ParseFiles(
 			"templates/base.html",
-			"templates/home.html",
+			"templates/pages/home.html",
 		))
 
 		ctx := struct {
-			User  User
+			User User
 		}{
-			User:  user,
+			User: user,
 		}
 
 		tmp.Execute(w, ctx)
@@ -80,19 +92,21 @@ func HomePageHandler(w http.ResponseWriter, r *http.Request) {
 
 func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
-	if user.IsAuthenticated { http.Redirect(w, r, "/", http.StatusSeeOther) }
+	if user.IsAuthenticated {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 
 	switch r.Method {
 	case "GET":
 		tmp := template.Must(template.ParseFiles(
 			"templates/base.html",
-			"templates/register.html",
+			"templates/account/register.html",
 		))
 
 		ctx := struct {
-			User  User
+			User User
 		}{
-			User:  user,
+			User: user,
 		}
 
 		tmp.Execute(w, ctx)
@@ -132,19 +146,21 @@ func RegisterPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
-	if user.IsAuthenticated { http.Redirect(w, r, "/", http.StatusSeeOther) }
+	if user.IsAuthenticated {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
 
 	switch r.Method {
 	case "GET":
 		tmp := template.Must(template.ParseFiles(
 			"templates/base.html",
-			"templates/login.html",
+			"templates/account/login.html",
 		))
 
 		ctx := struct {
-			User  User
+			User User
 		}{
-			User:  user,
+			User: user,
 		}
 
 		tmp.Execute(w, ctx)
@@ -202,19 +218,21 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 
 func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
-	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
+	if !user.IsAuthenticated {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
 
 	switch r.Method {
 	case "GET":
 		tmp := template.Must(template.ParseFiles(
 			"templates/base.html",
-			"templates/profile.html",
+			"templates/account/profile.html",
 		))
 
 		ctx := struct {
-			User  User
+			User User
 		}{
-			User:  user,
+			User: user,
 		}
 
 		tmp.Execute(w, ctx)
@@ -223,7 +241,9 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 
 func LogoutPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
-	if !user.IsAuthenticated { http.Redirect(w, r, "/login", http.StatusSeeOther) }
+	if !user.IsAuthenticated {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
 
 	switch r.Method {
 	case "GET":
@@ -234,5 +254,52 @@ func LogoutPageHandler(w http.ResponseWriter, r *http.Request) {
 		})
 
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	}
+}
+
+func InventoryPageHandler(w http.ResponseWriter, r *http.Request) {
+	user := Auth(w, r)
+
+	switch r.Method {
+	case "GET":
+		tmp := template.Must(template.ParseFiles(
+			"templates/base.html",
+			"templates/pages/inventory.html",
+		))
+
+		ctx := struct {
+			User      User
+			Statuses  []Status
+			Inventory []Inventory
+		}{
+			User: user,
+			Statuses: []Status{
+				{0, "Новый"},
+				{1, "Используемый"},
+			},
+			Inventory: []Inventory{
+				{0, "Баскетбольный мяч", "Новый", 10},
+				{1, "Воллейбольный мяч", "Используемый", 5},
+			},
+		}
+
+		tmp.Execute(w, ctx)
+	case "POST":
+		var formData ItemQueryFormData
+		err := json.NewDecoder(r.Body).Decode(&formData)
+		if err != nil {
+			http.Error(w, "Неправильный данные запроса", http.StatusBadRequest)
+			return
+		}
+
+		err = AddItemQuery(formData.Id, formData.Quantity, user.Id)
+		if err != nil {
+			http.Error(w, "Ошибка создания запроса", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/inventory", http.StatusSeeOther)
+	default:
+		http.Error(w, "Метод не разрешён", http.StatusMethodNotAllowed)
 	}
 }
