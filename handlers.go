@@ -2,8 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -29,6 +32,11 @@ type Claims struct {
 type ItemQueryFormData struct {
 	Id       int `json:"id"`
 	Quantity int `json:"quantity"`
+}
+
+type InventoryFormQuery struct {
+	ItemName string
+	Filters  map[int]bool
 }
 
 func NewUser(Email, Password string, IsAuthenticated, IsActive, IsAdmin, IsSuperuser bool) User {
@@ -200,7 +208,8 @@ func LoginPageHandler(w http.ResponseWriter, r *http.Request) {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 		tokenString, err := token.SignedString(jwtKey)
 		if err != nil {
-			http.Error(w, "Неуспешное создание токена", http.StatusInternalServerError)
+			log.Println("Неуспешное создание токена:", err)
+			http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
 			return
 		}
 
@@ -260,6 +269,18 @@ func LogoutPageHandler(w http.ResponseWriter, r *http.Request) {
 func InventoryPageHandler(w http.ResponseWriter, r *http.Request) {
 	user := Auth(w, r)
 
+	params := r.URL.Query()
+	itemName := params.Get("itemName")
+	filters := map[int]bool{}
+	for _, filter := range strings.Split(params.Get("filters"), ",") {
+		var x int
+		if n, _ := fmt.Sscan(filter, &x); n != 0 {
+			filters[x] = true
+		}
+	}
+	log.Print(itemName)
+	log.Print(filters)
+
 	switch r.Method {
 	case "GET":
 		tmp := template.Must(template.ParseFiles(
@@ -267,38 +288,55 @@ func InventoryPageHandler(w http.ResponseWriter, r *http.Request) {
 			"templates/pages/inventory.html",
 		))
 
+		itemNameId, _ := GetItemNameId(itemName)
+
+		itemQuery, err := GetItems(itemNameId, filters)
+		if err != nil {
+			http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+			return
+		}
+
+		inventory := []Inventory{}
+		for _, item := range itemQuery {
+			name, err := GetItemName(item.Name)
+			if err != nil {
+				http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+				return
+			}
+
+			status, err := GetItemStatus(item.Status)
+			if err != nil {
+				http.Error(w, "Ошибка сервера", http.StatusInternalServerError)
+				return
+			}
+
+			inventory = append(inventory, Inventory{item.Id, name, status, item.Quantity})
+		}
+
+		statuses := []Status{
+			{0, "Новый"},
+			{1, "Используемый"},
+		}
+
 		ctx := struct {
 			User      User
+			Query     InventoryFormQuery
 			Statuses  []Status
 			Inventory []Inventory
 		}{
 			User: user,
-			Statuses: []Status{
-				{0, "Новый"},
-				{1, "Используемый"},
+			Query: InventoryFormQuery{
+				itemName,
+				filters,
 			},
-			Inventory: []Inventory{
-				{0, "Баскетбольный мяч", "Новый", 10},
-				{1, "Воллейбольный мяч", "Используемый", 5},
-			},
+			Statuses:  statuses,
+			Inventory: inventory,
 		}
 
-		tmp.Execute(w, ctx)
-	case "POST":
-		var formData ItemQueryFormData
-		err := json.NewDecoder(r.Body).Decode(&formData)
+		err = tmp.Execute(w, ctx)
 		if err != nil {
-			http.Error(w, "Неправильный данные запроса", http.StatusBadRequest)
-			return
+			log.Println(err)
 		}
-
-		err = AddItemQuery(formData.Id, formData.Quantity, user.Id)
-		if err != nil {
-			http.Error(w, "Ошибка создания запроса", http.StatusInternalServerError)
-			return
-		}
-
-		http.Redirect(w, r, "/inventory", http.StatusSeeOther)
 	default:
 		http.Error(w, "Метод не разрешён", http.StatusMethodNotAllowed)
 	}

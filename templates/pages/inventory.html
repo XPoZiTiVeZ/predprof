@@ -38,7 +38,7 @@
     <div class="top-side">
         <div class="search-side">
             <form action="/inventory" method="GET" id="inventory-search">
-                <input type="text" name="item">
+                <input type="text" name="item", value="{{ .Query.ItemName }}">
                 <button>Искать</button>
             </form>
         </div>
@@ -47,9 +47,10 @@
         <h2>Доступный инвентарь</h2>
         <div class="filter-side">
             <form action="/inventory" method="GET" id="inventory-filter">
+                {{ $query := .Query }}
                 {{ range .Statuses }}
                 <div class="filter-form-line">
-                    <input type="checkbox" name="{{ .Id }}" id="input-status-{{ .Id }}" checked>
+                    <input type="checkbox" name="{{ .Id }}" id="input-status-{{ .Id }}" {{ if index $query.Filters .Id }}checked{{ end }}>
                     <label for="input-status-{{ .Id }}">{{ .Name }}</label>
                 </div>
                 {{ end }}
@@ -100,34 +101,29 @@
     }
 
     const searchForm = document.getElementById("inventory-search");
-    const filterForm = document.getElementById("inventory-fitler");
+    const filterForm = document.getElementById("inventory-filter");
 
     searchForm.addEventListener("submit", getInventory);
-
-    async function getInventory() {
+    filterForm.addEventListener("submit", getInventory);
+    async function getInventory(e) {
         e.preventDefault();
 
-        const itemName = searchForm.querySelector("input").value;
-        const filters  = [filterForm.querySelectorAll("input")]
+        let itemName = searchForm.querySelector("input").value;
+        let filters  = filterForm.querySelectorAll("input");
 
-        const response = await fetch('/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                "itemName":  name,
-                "filters": 
-            })
+        let link = `/inventory?itemName=${itemName}&filters=`;
+        let start = true;
+        filters.forEach(element => {
+            if (element.checked) {
+                if (!start) {
+                    link += `,`;
+                }
+                link += `${element.name}`;
+                start = false;
+            }
         });
 
-        if (response.ok) {
-            alert('Успешная регистрация! Теперь вы можете войти в аккаунт.');
-            window.location.href = '/login';
-        } else {
-            alert('Неуспешная регистрация! Проверьте, что поля заполнены правильно.');
-        }
-
+        location.href = link;
     }
 </script>
 {{ end }}
